@@ -73,7 +73,7 @@ async def confirm_application(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Calculate fees
     prep_fee = 5000.0 
-    consultant_fee = amount * 0.05  # 5% consultant fee
+    consultant_fee = amount * 0.05
     
     # Generate Application Number
     app_number = f"LR-{datetime.datetime.now().year}-{random.randint(100, 999)}"
@@ -81,7 +81,7 @@ async def confirm_application(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Save to Database
     db.save_loan(user_id, app_number, bank, amount, prep_fee, consultant_fee, duration, loan_type)
     
-    # Generate Report Format exactly like the image
+    # Generate Report
     now_str = datetime.datetime.now().isoformat()
     
     report = f"""🆔 የማመልከቻ ቁጥር: <b>{app_number}</b>
@@ -140,7 +140,6 @@ def main():
 
     application = ApplicationBuilder().token(TOKEN).build()
 
-    # Set up the step-by-step conversation
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('apply', apply_start)],
         states={
