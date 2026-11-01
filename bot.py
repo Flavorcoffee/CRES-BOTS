@@ -71,9 +71,9 @@ async def confirm_application(update: Update, context: ContextTypes.DEFAULT_TYPE
     duration = context.user_data['duration']
     loan_type = context.user_data['type']
     
-    # Calculate fees (You can change these formulas later)
+    # Calculate fees
     prep_fee = 5000.0 
-    consultant_fee = amount * 0.05  # Example: 5% consultant fee
+    consultant_fee = amount * 0.05  # 5% consultant fee
     
     # Generate Application Number
     app_number = f"LR-{datetime.datetime.now().year}-{random.randint(100, 999)}"
@@ -128,7 +128,7 @@ def main():
     # Fix for Termux Python 3.14
     try:
         asyncio.set_event_loop(asyncio.new_event_loop())
-    except Exception as e:
+    except Exception:
         pass
 
     db.init_db()
