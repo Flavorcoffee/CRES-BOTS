@@ -2,8 +2,7 @@ import sqlite3
 from contextlib import closing
 import os
 
-# Render Persistent Disk path
-DB_PATH = "/data/beder.db"
+DB_PATH = "beder.db"
 
 def _connect():
     conn = sqlite3.connect(DB_PATH)
@@ -12,10 +11,6 @@ def _connect():
     return conn
 
 def init_db():
-    # Ensure the /data directory exists if running locally
-    if os.path.dirname(DB_PATH):
-        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    
     with closing(_connect()) as conn:
         conn.executescript("""
         CREATE TABLE IF NOT EXISTS users (
@@ -42,13 +37,6 @@ def init_db():
             attachments_count INTEGER DEFAULT 0,
             accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-
-        CREATE TABLE IF NOT EXISTS loan_documents (
-            loan_id INTEGER,
-            doc_name TEXT,
-            is_provided INTEGER DEFAULT 0,
-            PRIMARY KEY (loan_id, doc_name)
-        );
         """)
         conn.commit()
 
@@ -62,4 +50,14 @@ def upsert_user(uid, username, full_name):
             "INSERT INTO users (telegram_id, username, full_name) VALUES (?,?,?) "
             "ON CONFLICT(telegram_id) DO UPDATE SET username=excluded.username, full_name=excluded.full_name",
             (uid, username, full_name))
+        conn.commit()
+
+# NEW FUNCTION to save the loan
+def save_loan(user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration, loan_type):
+    with closing(_connect()) as conn:
+        conn.execute("""
+            INSERT INTO loan_applications 
+            (user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration_months, loan_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration, loan_type))
         conn.commit()
