@@ -52,7 +52,6 @@ def upsert_user(uid, username, full_name):
             (uid, username, full_name))
         conn.commit()
 
-# NEW FUNCTION to save the loan
 def save_loan(user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration, loan_type):
     with closing(_connect()) as conn:
         conn.execute("""
