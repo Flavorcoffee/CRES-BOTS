@@ -1,6 +1,7 @@
 import sqlite3
 from contextlib import closing
 import os
+import json
 
 DB_PATH = "beder.db"
 
@@ -25,17 +26,9 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             app_number TEXT UNIQUE,
             user_id INTEGER,
-            bank_name TEXT,
-            loan_amount REAL,
-            prep_fee REAL,
-            consultant_fee REAL,
-            duration_months INTEGER,
-            loan_type TEXT,
+            data_json TEXT, 
             status TEXT DEFAULT 'pending',
-            lien_free INTEGER DEFAULT 0,
-            insurance_agreed INTEGER DEFAULT 0,
-            attachments_count INTEGER DEFAULT 0,
-            accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
         conn.commit()
@@ -52,11 +45,12 @@ def upsert_user(uid, username, full_name):
             (uid, username, full_name))
         conn.commit()
 
-def save_loan(user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration, loan_type):
+def save_full_loan(user_id, app_number, data_dict):
     with closing(_connect()) as conn:
-        conn.execute("""
-            INSERT INTO loan_applications 
-            (user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration_months, loan_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (user_id, app_number, bank_name, loan_amount, prep_fee, consultant_fee, duration, loan_type))
+        # Convert the dictionary of answers to a JSON string
+        data_str = json.dumps(data_dict, ensure_ascii=False)
+        conn.execute(
+            "INSERT INTO loan_applications (user_id, app_number, data_json) VALUES (?, ?, ?)",
+            (user_id, app_number, data_str)
+        )
         conn.commit()
