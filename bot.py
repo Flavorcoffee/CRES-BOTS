@@ -1,14 +1,15 @@
 import os
 import asyncio
 import logging
-import os
-import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 import db
 
 # Setup logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+    level=logging.INFO
+)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -21,14 +22,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def apply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # We will build the step-by-step loan application here later
     await update.message.reply_text("Loan application process will start here soon.")
 
 def main():
+    # FIX FOR PYTHON 3.14 ON TERMUX: Create a new event loop
+    try:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+    except Exception as e:
+        print(f"Event loop setup note: {e}")
+
     # 1. Initialize Database
     db.init_db()
     
-    # 2. Get Token securely from Render Environment Variables
+    # 2. Get Token securely
     TOKEN = os.environ.get("BOT_TOKEN")
     if not TOKEN:
         print("ERROR: BOT_TOKEN environment variable is missing!")
